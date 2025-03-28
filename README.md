@@ -1,78 +1,146 @@
-# 🚀 Credit Card Fraud Detection
+# Credit Card Fraud Detection (Finance & Banking Analysis 
 
-## 📌 Project Overview
-This project aims to detect fraudulent credit card transactions using **Python, Pandas, Scikit-learn, and Machine Learning models**. The dataset is highly imbalanced, so we apply **EDA, feature engineering, and SMOTE for balancing the classes.**
+## Step 1: Set Up Your Environment
+Tools Required:
+✅ Python (Jupyter Notebook or VS Code)
+✅ Libraries: Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn
+✅ Dataset: Download from Kaggle
 
-## 📊 Dataset
-- **Source:** [Kaggle - Credit Card Fraud Detection](https://www.kaggle.com/mlg-ulb/creditcardfraud)
-- **Size:** 284,807 transactions
-- **Features:**
-  - `Time`, `Amount`
-  - `V1` to `V28` (PCA-transformed features)
-  - `Class` (Target: **0 = Legit, 1 = Fraud**)
+Install Required Libraries:
+If you haven't installed them, run:
 
-## ⚙️ Tools & Technologies
-- **Python** (Pandas, NumPy, Matplotlib, Seaborn, Scikit-learn, Imbalanced-learn)
-- **Machine Learning** (Random Forest, Logistic Regression, XGBoost)
-- **SMOTE** (To handle imbalanced classes)
+python
+Copy
+Edit
+pip install pandas numpy matplotlib seaborn scikit-learn
+Step 2: Load and Explore the Dataset
+📌 Goal: Understand the structure of the dataset and check for missing values.
 
-## 🔍 Exploratory Data Analysis (EDA)
-✔ Checked for missing values
-✔ Visualized class distribution (Fraud vs. Non-Fraud)
-✔ Plotted feature correlations
-✔ Scaled `Amount` and `Time` using **StandardScaler**
+Code:
+python
+Copy
+Edit
+import pandas as pd
 
-## 🏗️ Model Training & Evaluation
-1️⃣ **Baseline Model** → Logistic Regression
-2️⃣ **Improved Model** → Random Forest (High Accuracy ⚡)
-3️⃣ **Final Model** → XGBoost (Best Performance ✅)
+# Load the dataset
+df = pd.read_csv("creditcard.csv")
 
-### **Performance Metrics**
-| Model | Precision | Recall | F1-Score |
-|--------|------------|--------|--------|
-| Logistic Regression | 0.82 | 0.75 | 0.78 |
-| Random Forest | 0.95 | 0.89 | 0.92 |
-| XGBoost | **0.97** | **0.91** | **0.94** |
+# Check first 5 rows
+df.head()
+Explore Dataset:
+python
+Copy
+Edit
+# Check dataset shape
+print("Dataset Shape:", df.shape)
 
-## 📌 Key Findings
-✔ Fraud transactions have unique patterns different from regular transactions.
-✔ **SMOTE improves model performance** by balancing the dataset.
-✔ Random Forest & XGBoost perform significantly better than logistic regression.
+# Check for missing values
+print("Missing Values:\n", df.isnull().sum())
 
-## 🛠️ How to Run the Project
-1️⃣ Clone the repository:
-```bash
-git clone <your-repo-url>
-cd credit-card-fraud-detection
-```
-2️⃣ Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-3️⃣ Run the Jupyter Notebook:
-```bash
-jupyter notebook
-```
+# Get dataset info
+df.info()
+✅ Outcome: You'll see columns like Time, V1-V28 (anonymized features), Amount, and Class (0 = Not Fraud, 1 = Fraud).
 
-## 📁 Folder Structure
-```
-├── data/              # Dataset folder
-├── notebooks/         # Jupyter Notebooks for analysis
-├── models/            # Saved models
-├── README.md          # Project documentation
-└── requirements.txt   # Python dependencies
-```
+Step 3: Data Cleaning & Preprocessing
+📌 Goal: Handle class imbalance and scale features.
 
-## 🚀 Next Steps
-- Try **Deep Learning models (LSTM, Autoencoders)**.
-- Deploy as an **API using Flask**.
-- Create a **dashboard using Streamlit**.
+Check Class Distribution:
+python
+Copy
+Edit
+# Count of fraudulent vs non-fraudulent transactions
+df["Class"].value_counts(normalize=True) * 100
+✅ You'll notice an imbalance (fraud cases are very few).
 
-## 📌 Author
-👤 **Your Name**  
-📧 Email: your.email@example.com  
-📌 LinkedIn: [Your Profile](https://www.linkedin.com/in/your-profile)  
-📌 GitHub: [Your GitHub](https://github.com/your-github)
+Apply Feature Scaling (Normalize Amount & Time Columns)
+python
+Copy
+Edit
+from sklearn.preprocessing import StandardScaler
 
----
-⭐ **If you like this project, please give it a star!** ⭐
+scaler = StandardScaler()
+df["Amount"] = scaler.fit_transform(df["Amount"].values.reshape(-1, 1))
+df["Time"] = scaler.fit_transform(df["Time"].values.reshape(-1, 1))
+
+df.head()
+Step 4: Exploratory Data Analysis (EDA)
+📌 Goal: Identify fraud patterns using visualizations.
+
+Plot Fraud vs. Non-Fraud Transactions
+python
+Copy
+Edit
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+plt.figure(figsize=(6,4))
+sns.countplot(x=df["Class"])
+plt.title("Fraud vs Non-Fraud Transactions")
+plt.show()
+Correlation Heatmap
+python
+Copy
+Edit
+plt.figure(figsize=(12,8))
+sns.heatmap(df.corr(), cmap="coolwarm", linewidths=0.5)
+plt.title("Feature Correlation")
+plt.show()
+✅ Outcome: You will observe which features are highly correlated with fraud.
+
+Step 5: Build Fraud Detection Model
+📌 Goal: Use a Machine Learning model to detect fraud.
+
+Split Data into Training & Testing Sets
+python
+Copy
+Edit
+from sklearn.model_selection import train_test_split
+
+X = df.drop("Class", axis=1)
+y = df["Class"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
+Apply Random Forest Classifier
+python
+Copy
+Edit
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Train model
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+✅ Outcome: You will get precision, recall, and F1-score to measure fraud detection accuracy.
+
+Step 6: Improve Model Performance
+📌 Goal: Handle class imbalance using SMOTE (Synthetic Minority Over-sampling Technique).
+
+Balance Dataset using SMOTE
+python
+Copy
+Edit
+from imblearn.over_sampling import SMOTE
+
+sm = SMOTE(random_state=42)
+X_resampled, y_resampled = sm.fit_resample(X, y)
+
+# Check class distribution after SMOTE
+pd.Series(y_resampled).value_counts()
+Train Again with Balanced Data
+python
+Copy
+Edit
+X_train, X_test, y_train, y_test = train_test_split(X_resampled, y_resampled, test_size=0.2, random_state=42)
+
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+print(classification_report(y_test, y_pred))
+✅ Outcome: The model will perform better in detecting fraud.
